@@ -29,8 +29,8 @@ public class ForwardSmsAction extends RunnableAction {
     private void forwardSmsMsg(SmsMsg smsMsg) {
         String channelType = XSPUtils.getForwardChannelType(sp);
         XLog.d("start forward: " + channelType);
-        String title = "卡"+smsMsg.getSubId()+"收到" + smsMsg.getSender() + "的新消息";
-        String content = smsMsg.getBody() + "\n--来自设备：【" + XSPUtils.getDeviceId(sp) + "】";
+        String title = "卡 "+smsMsg.getSubId()+" 收到 " + smsMsg.getSender() + " 的新消息";
+        String content = smsMsg.getBody() + "\n  来自设备：【" + XSPUtils.getDeviceId(sp) + "】";
         try {
             boolean suc = false;
             switch (channelType) {
