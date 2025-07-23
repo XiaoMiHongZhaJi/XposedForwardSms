@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao' // apply greenDao plugin
 apply from: 'and-res-guard.gradle'
 
-def keyFile = file("keystore.jks")
+def keyFile = rootProject.file("keystore.jks")
 
 def static releaseTime() {
     return new Date().format("yyMMdd", TimeZone.default)
