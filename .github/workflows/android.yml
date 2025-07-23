@@ -3,9 +3,8 @@ name: XposedForwardSms
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "master", "dev" ]
-  pull_request:
-    branches: [ "main", "master", "dev" ]
+    tags:
+      - 'v*'   # 仅在打 tag 时触发，例如 v1.0.0
 
 jobs:
   build:
@@ -23,9 +22,13 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
+    - name: Decode keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
       
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew assembleRelease
       
     - name: Show build output files
       # ls -R 会递归列出目录下的所有文件和文件夹
@@ -42,3 +45,12 @@ jobs:
       with:
         name: XposedForwardSms-release-apk
         path: app/build/outputs/apk/release/*.apk
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        files: app/build/outputs/apk/release/*.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
