@@ -72,7 +72,10 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void hookConstructor(ClassLoader classloader) {
-        if (Build.VERSION.SDK_INT >= 30) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // Android 14+
+            hookConstructor34(classloader);
+        } else if (Build.VERSION.SDK_INT >= 30) {
             // Android 11+
             hookConstructor30(classloader);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -81,6 +84,15 @@ public class SmsHandlerHook extends BaseHook {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             // Android 4.4 ~ 6.1 (api 19 - 23)
             hookConstructor19(classloader);
+        }
+    }
+
+    // Android 14+
+    private void hookConstructor34(ClassLoader classLoader) {
+        XLog.i("Hooking InboundSmsHandler constructor for android v34+");
+        Class<?> smsHandlerClazz = XposedWrapper.findClass(SMS_HANDLER_CLASS, classLoader);
+        if (smsHandlerClazz != null) {
+            XposedBridge.hookAllConstructors(smsHandlerClazz, new ConstructorHook());
         }
     }
 
