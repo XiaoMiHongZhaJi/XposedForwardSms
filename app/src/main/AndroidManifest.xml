@@ -28,6 +28,9 @@
         <meta-data
             android:name="xposedminversion"
             android:value="30"/>
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope"/>
 
         <activity
             android:name="com.xtjun.xpForwardSms.ui.home.HomeActivity"
