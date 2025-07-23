@@ -31,7 +31,7 @@ jobs:
       run: ls -al ./
       
     - name: Build with Gradle
-      run: ./gradlew assembleRelease
+      run: ./gradlew clean assembleRelease
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
