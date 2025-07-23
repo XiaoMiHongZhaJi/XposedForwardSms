@@ -55,15 +55,16 @@
         </activity-alias>
 
         <activity
-            android:name="com.jaredrummler.cyanea.prefs.CyaneaThemePickerActivity"
-            android:label="@string/label_theme_picker"
-            android:theme="@style/AppActionBarTheme"/>
+                android:name="com.jaredrummler.cyanea.prefs.CyaneaThemePickerActivity"
+                android:label="@string/label_theme_picker"
+                android:theme="@style/AppActionBarTheme"
+                tools:replace="android:theme" />
 
         <activity
-            tools:replace="android:theme"
-            android:name="com.jaredrummler.cyanea.prefs.CyaneaSettingsActivity"
-            android:label="@string/pref_theme_title"
-            android:theme="@style/AppActionBarTheme"/>
+                android:name="com.jaredrummler.cyanea.prefs.CyaneaSettingsActivity"
+                android:label="@string/pref_theme_title"
+                android:theme="@style/AppActionBarTheme"
+                tools:replace="android:theme" />
 
         <provider
             android:name="com.xtjun.xpForwardSms.common.msp.MultiProcessSharedPreferences"
