@@ -37,6 +37,8 @@ public class TestSmsAction extends RunnableAction {
         XLog.d("start forward: " + channelType);
         String title = "来自 " + smsMsg.getSender() + " 的新消息";
         String content = smsMsg.getBody() + "\n来自设备：【" + SPUtils.getDeviceId(sp) + "】";
+        XLog.w("title: " + title);
+        XLog.w("content: " + content);
         try {
             boolean suc = false;
             switch (channelType) {

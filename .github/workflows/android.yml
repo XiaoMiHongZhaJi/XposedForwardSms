@@ -42,12 +42,3 @@ jobs:
       with:
         name: XposedForwardSms-release-apk
         path: app/build/outputs/apk/release/*.apk
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
-        files: app/build/outputs/apk/release/*.apk
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
