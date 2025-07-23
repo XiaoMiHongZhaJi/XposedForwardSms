@@ -1,5 +1,9 @@
 # XposedForwardSms
+
+**相比原版，更新支持 Android 14+**
+
 转发短信的Xposed模块，收到短信时自动发起请求，将短信内容通过http请求发送出去，便于在另一个手机上接收。
+
 项目参考自[XposedSmsCode](https://github.com/tianma8023/XposedSmsCode)。
 
 # 应用截图
