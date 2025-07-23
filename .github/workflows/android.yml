@@ -1,0 +1,44 @@
+name: XposedForwardSms
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "master", "dev" ]
+  pull_request:
+    branches: [ "main", "master", "dev" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build with Gradle
+      run: ./gradlew build
+      
+    - name: Show build output files
+      # ls -R 会递归列出目录下的所有文件和文件夹
+      run: ls -R app/build/outputs/
+
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: XposedForwardSms-debug-apk
+        path: app/build/outputs/apk/debug/*.apk
+      
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: XposedForwardSms-release-apk
+        path: app/build/outputs/apk/release/*.apk
