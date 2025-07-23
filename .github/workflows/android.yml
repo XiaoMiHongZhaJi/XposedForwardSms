@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'v*'   # 仅在打 tag 时触发，例如 v1.0.0
+      - 'v*'
 
 jobs:
   build:
