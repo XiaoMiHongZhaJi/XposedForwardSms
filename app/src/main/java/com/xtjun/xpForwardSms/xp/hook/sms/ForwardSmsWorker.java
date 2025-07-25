@@ -43,7 +43,7 @@ public class ForwardSmsWorker {
         }
 
         //获取短信
-        SmsGetAction smsGetAction = new SmsGetAction(null);
+        SmsGetAction smsGetAction = new SmsGetAction(null, sp);
         smsGetAction.setSmsIntent(mSmsIntent);
         ScheduledFuture<Bundle> smsParseFuture = mScheduledExecutor.schedule(smsGetAction, 0, TimeUnit.MILLISECONDS);
 
