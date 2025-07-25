@@ -3,7 +3,6 @@ package com.xtjun.xpForwardSms.xp.hook.sms;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -75,14 +74,14 @@ public class SmsHandlerHook extends BaseHook {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             // Android 14+
             hookConstructor34(classloader);
-        } else if (Build.VERSION.SDK_INT >= 30) {
-            // Android 11+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11 ~ 13 (api 30 - 33)
             hookConstructor30(classloader);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // Android 7.0 ~ 10 (api 24 - 29)
             hookConstructor24(classloader);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // Android 4.4 ~ 6.1 (api 19 - 23)
+            // Android 4.4 ~ 6.0 (api 19 - 23)
             hookConstructor19(classloader);
         }
     }
@@ -132,13 +131,17 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void hookDispatchIntent(ClassLoader classloader) {
-        if (Build.VERSION.SDK_INT >= 29) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+ (api >= 29)
             hookDispatchIntent29(classloader);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6.0 ~ 9.0 (api 23 - 28)
             hookDispatchIntent23(classloader);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Android 5.0 ~ 5.1 (api 21 - 22)
             hookDispatchIntent21(classloader);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // Android 4.4 (api 19 - 20)
             hookDispatchIntent19(classloader);
         }
     }
@@ -275,14 +278,10 @@ public class SmsHandlerHook extends BaseHook {
         // 设置卡槽信息
         putPhoneIdAndSubIdExtra(param.thisObject, intent);
 
-        ParseResult parseResult = new ForwardSmsWorker(mAppContext, intent).parse();
-        if (parseResult != null) {// parse succeed
-            if (parseResult.isBlockSms()) {
-                XLog.d("Blocking code SMS...");
-                deleteRawTableAndSendMessage(param.thisObject, param.args[receiverIndex]);
-                param.setResult(null);
-            }
-        }
+        // 转发信息
+        String result = new ForwardSmsWorker(mAppContext, intent).parse();
+
+        XLog.i("ForwardSmsWorker result: %s", result);
     }
 
     private void putPhoneIdAndSubIdExtra(Object inboundSmsHandler, Intent intent) {
@@ -295,56 +294,6 @@ public class SmsHandlerHook extends BaseHook {
                 XLog.e("Could not update intent with subscription id", e);
             }
         }
-    }
-
-    private static final int EVENT_BROADCAST_COMPLETE = 3;
-
-    private void deleteRawTableAndSendMessage(Object inboundSmsHandler, Object smsReceiver) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            deleteFromRawTable(inboundSmsHandler, smsReceiver);
-        } catch (Throwable e) {
-            XLog.e("Error occurs when delete SMS data from raw table", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-
-        sendEventBroadcastComplete(inboundSmsHandler);
-    }
-
-    private void sendEventBroadcastComplete(Object inboundSmsHandler) {
-        XLog.d("Send event(EVENT_BROADCAST_COMPLETE)");
-        XposedHelpers.callMethod(inboundSmsHandler, "sendMessage", EVENT_BROADCAST_COMPLETE);
-    }
-
-    private void deleteFromRawTable(Object inboundSmsHandler, Object smsReceiver) throws ReflectiveOperationException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            deleteFromRawTable24(inboundSmsHandler, smsReceiver);
-        } else {
-            deleteFromRawTable19(inboundSmsHandler, smsReceiver);
-        }
-    }
-
-    private void deleteFromRawTable19(Object inboundSmsHandler, Object smsReceiver) throws ReflectiveOperationException {
-        XLog.d("Delete raw SMS data from database on Android 19+");
-        Object deleteWhere = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhere");
-        Object deleteWhereArgs = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhereArgs");
-
-        callDeclaredMethod(SMS_HANDLER_CLASS, inboundSmsHandler, "deleteFromRawTable",
-                /* String deleteWhere       */ deleteWhere,
-                /* String[] deleteWhereArgs */ deleteWhereArgs);
-    }
-
-    private void deleteFromRawTable24(Object inboundSmsHandler, Object smsReceiver) throws ReflectiveOperationException {
-        XLog.d("Delete raw SMS data from database on Android 24+");
-        Object deleteWhere = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhere");
-        Object deleteWhereArgs = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhereArgs");
-        final int MARK_DELETED = 2;
-
-        callDeclaredMethod(SMS_HANDLER_CLASS, inboundSmsHandler, "deleteFromRawTable",
-                /* String deleteWhere       */ deleteWhere,
-                /* String[] deleteWhereArgs */ deleteWhereArgs,
-                /* int deleteType           */ MARK_DELETED);
     }
 
     private static Object callDeclaredMethod(String className, Object obj, String methodName, Object... args) throws InvocationTargetException, IllegalAccessException {

@@ -35,7 +35,7 @@ public class ForwardSmsWorker {
         mScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
-    public ParseResult parse() {
+    public String parse() {
         if (!XSPUtils.isEnabled(sp)) {
             XLog.i("XposedForwardSms disabled, exiting");
             return null;
@@ -83,12 +83,6 @@ public class ForwardSmsWorker {
         //转发短信
         if (filterFlag) new Thread(new ForwardSmsAction(smsMsg, sp)).start();
 
-        return buildParseResult();
-    }
-
-    private ParseResult buildParseResult() {
-        ParseResult parseResult = new ParseResult();
-        parseResult.setBlockSms(false);
-        return parseResult;
+        return "success";
     }
 }
