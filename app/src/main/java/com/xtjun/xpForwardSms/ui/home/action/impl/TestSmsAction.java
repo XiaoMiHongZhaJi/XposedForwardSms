@@ -37,8 +37,6 @@ public class TestSmsAction extends RunnableAction {
         XLog.d("start forward: " + channelType);
         String title = "来自 " + smsMsg.getSender() + " 的新消息";
         String content = smsMsg.getBody() + "\n来自设备：【" + SPUtils.getDeviceId(sp) + "】";
-        XLog.w("title: " + title);
-        XLog.w("content: " + content);
         try {
             boolean suc = false;
             switch (channelType) {
@@ -58,14 +56,14 @@ public class TestSmsAction extends RunnableAction {
                     long now = System.currentTimeMillis();
                     long expDate = sp.getLong("wxcp_expDate", 0L);
                     String token = sp.getString("excp_token", "");
-                    if (now > (expDate + 3600000)){
-                       String wxcpToken = HttpUtils.getWxcpToken(SPUtils.getWxCorpid(sp), SPUtils.getWxCorpsecret(sp));
+                    if (now > (expDate + 3600000)) {
+                        String wxcpToken = HttpUtils.getWxcpToken(SPUtils.getWxCorpid(sp), SPUtils.getWxCorpsecret(sp));
                         if (StringUtils.isNotEmpty(wxcpToken)) {
                             token = wxcpToken;
                             sp.edit().putLong("wxcp_expDate", now).putString("excp_token", wxcpToken).apply();
                         }
                     }
-                    suc = HttpUtils.postWxcpMsg(token,SPUtils.getWxAgentid(sp),SPUtils.getWxTouser(sp),title,content);
+                    suc = HttpUtils.postWxcpMsg(token, SPUtils.getWxAgentid(sp), SPUtils.getWxTouser(sp), title, content);
                     break;
                 default:
                     break;

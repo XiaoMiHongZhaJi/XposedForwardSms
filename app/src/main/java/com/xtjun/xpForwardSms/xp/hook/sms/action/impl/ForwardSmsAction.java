@@ -29,10 +29,8 @@ public class ForwardSmsAction extends RunnableAction {
     private void forwardSmsMsg(SmsMsg smsMsg) {
         String channelType = XSPUtils.getForwardChannelType(sp);
         XLog.d("start forward: " + channelType);
-        String title = "卡 "+smsMsg.getSubId()+" 收到 " + smsMsg.getSender() + " 的新消息";
+        String title = "卡 " + smsMsg.getSubId() + " 收到 " + smsMsg.getSender() + " 的新消息";
         String content = smsMsg.getBody() + "\n来自设备：【" + XSPUtils.getDeviceId(sp) + "】";
-        XLog.w("title: " + title);
-        XLog.w("content: " + content);
         try {
             boolean suc = false;
             switch (channelType) {
@@ -52,14 +50,14 @@ public class ForwardSmsAction extends RunnableAction {
                     long now = System.currentTimeMillis();
                     long expDate = sp.getLong("wxcp_expDate", 0L);
                     String token = sp.getString("excp_token", "");
-                    if (now > (expDate + 3600000)){
+                    if (now > (expDate + 3600000)) {
                         String wxcpToken = XHttpUtils.getWxcpToken(XSPUtils.getWxCorpid(sp), XSPUtils.getWxCorpsecret(sp));
                         if (StringUtils.isNotEmpty(wxcpToken)) {
                             token = wxcpToken;
                             sp.edit().putLong("wxcp_expDate", now).putString("excp_token", wxcpToken).apply();
                         }
                     }
-                    suc = XHttpUtils.postWxcpMsg(token,XSPUtils.getWxAgentid(sp),XSPUtils.getWxTouser(sp),title,content);
+                    suc = XHttpUtils.postWxcpMsg(token, XSPUtils.getWxAgentid(sp), XSPUtils.getWxTouser(sp), title, content);
                     break;
                 default:
                     break;

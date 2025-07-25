@@ -24,8 +24,11 @@ public class HttpUtils {
 
     public static boolean custGet(String url, String title, String content) {
         try {
+            XLog.d("cust get url:%s title: %s content: %s", url, title, content);
             content = URLEncoder.encode(content, "UTF-8");
+            XLog.d("cust get content encode:%s", content);
             url = url.replace(TITLE, title).replace(CONTENT, content);
+            XLog.d("cust get real url:%s", url);
             Request request = new Request.Builder().url(url).build();
             Response response = client.newCall(request).execute();//发送请求
             String result = response.body() != null ? response.body().string() : "";
