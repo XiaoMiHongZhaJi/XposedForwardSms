@@ -14,11 +14,9 @@ import java.util.concurrent.Callable;
 public abstract class CallableAction implements Action<Bundle>, Callable<Bundle> {
 
     protected SmsMsg mSmsMsg;
-    protected SharedPreferences sp;
 
-    public CallableAction(SmsMsg smsMsg, SharedPreferences sp) {
+    public CallableAction(SmsMsg smsMsg) {
         this.mSmsMsg = smsMsg;
-        this.sp = sp;
     }
 
     @Override

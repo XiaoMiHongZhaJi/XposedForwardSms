@@ -339,7 +339,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     private void testSms() {
         SmsMsg smsMsg = new SmsMsg().setSender(getString(R.string.pref_test_sms_sender)).setBody(getString(R.string.pref_test_sms_body));
-        new Thread(new TestSmsAction(mActivity, smsMsg, msp)).start();
+        new Thread(new TestSmsAction(mActivity, smsMsg)).start();
     }
 
     private void showVersionInfo(Preference preference) {

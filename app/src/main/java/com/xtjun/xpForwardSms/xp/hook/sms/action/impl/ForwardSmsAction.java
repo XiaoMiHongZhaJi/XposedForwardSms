@@ -16,8 +16,8 @@ import com.xtjun.xpForwardSms.common.utils.XSPUtils;
  */
 public class ForwardSmsAction extends RunnableAction {
 
-    public ForwardSmsAction(SmsMsg smsMsg, SharedPreferences sp) {
-        super(smsMsg, sp);
+    public ForwardSmsAction(SmsMsg smsMsg) {
+        super(smsMsg);
     }
 
     @Override
@@ -27,17 +27,17 @@ public class ForwardSmsAction extends RunnableAction {
     }
 
     private void forwardSmsMsg(SmsMsg smsMsg) {
-        String channelType = XSPUtils.getForwardChannelType(sp);
+        String channelType = "GET";
         XLog.d("start forward: " + channelType);
         String title = "卡 " + smsMsg.getSubId() + " 收到 " + smsMsg.getSender() + " 的新消息";
-        String content = smsMsg.getBody() + "\n来自设备：【" + XSPUtils.getDeviceId(sp) + "】";
+        String content = smsMsg.getBody() + "\n来自设备：【" + "test" + "】";
         try {
             boolean suc = false;
             switch (channelType) {
                 case Const.CHANNEL_GET:
-                    suc = XHttpUtils.custGet(XSPUtils.getGetUrl(sp), title, content);
+                    suc = XHttpUtils.custGet("https://msg.cyf.mom/xmhzj/?{{title}}/{{content}}", title, content);
                     break;
-                case Const.CHANNEL_POST:
+                /*case Const.CHANNEL_POST:
                     suc = XHttpUtils.custPost(XSPUtils.getPostUrl(sp), XSPUtils.getPostType(sp), XSPUtils.getPostContent(sp), title, content);
                     break;
                 case Const.CHANNEL_DING:
@@ -58,7 +58,7 @@ public class ForwardSmsAction extends RunnableAction {
                         }
                     }
                     suc = XHttpUtils.postWxcpMsg(token, XSPUtils.getWxAgentid(sp), XSPUtils.getWxTouser(sp), title, content);
-                    break;
+                    break;*/
                 default:
                     break;
             }

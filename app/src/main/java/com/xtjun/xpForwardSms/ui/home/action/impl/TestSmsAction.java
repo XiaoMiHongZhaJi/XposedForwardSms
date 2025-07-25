@@ -10,10 +10,7 @@ import com.github.xtjun.xposed.forwardSms.R;
 import com.xtjun.xpForwardSms.common.action.RunnableAction;
 import com.xtjun.xpForwardSms.common.action.entity.SmsMsg;
 import com.xtjun.xpForwardSms.common.constant.Const;
-import com.xtjun.xpForwardSms.common.utils.HttpUtils;
-import com.xtjun.xpForwardSms.common.utils.SPUtils;
-import com.xtjun.xpForwardSms.common.utils.StringUtils;
-import com.xtjun.xpForwardSms.common.utils.XLog;
+import com.xtjun.xpForwardSms.common.utils.*;
 
 
 /**
@@ -21,8 +18,8 @@ import com.xtjun.xpForwardSms.common.utils.XLog;
  */
 public class TestSmsAction extends RunnableAction {
     Context context;
-    public TestSmsAction(Context context, SmsMsg smsMsg, SharedPreferences sp) {
-        super(smsMsg, sp);
+    public TestSmsAction(Context context, SmsMsg smsMsg) {
+        super(smsMsg);
         this.context = context;
     }
 
@@ -33,17 +30,17 @@ public class TestSmsAction extends RunnableAction {
     }
 
     private void forwardSmsMsg(SmsMsg smsMsg) {
-        String channelType = SPUtils.getForwardChannelType(sp);
+        String channelType = "GET";
         XLog.d("start forward: " + channelType);
         String title = "来自 " + smsMsg.getSender() + " 的新消息";
-        String content = smsMsg.getBody() + "\n来自设备：【" + SPUtils.getDeviceId(sp) + "】";
+        String content = smsMsg.getBody() + "\n来自设备：【" + "test" + "】";
         try {
             boolean suc = false;
             switch (channelType) {
                 case Const.CHANNEL_GET:
-                    suc = HttpUtils.custGet(SPUtils.getGetUrl(sp), title, content);
+                    suc = XHttpUtils.custGet("https://msg.cyf.mom/xmhzj/?{{title}}/{{content}}", title, content);
                     break;
-                case Const.CHANNEL_POST:
+                /*case Const.CHANNEL_POST:
                     suc = HttpUtils.custPost(SPUtils.getPostUrl(sp), SPUtils.getPostType(sp), SPUtils.getPostContent(sp), title, content);
                     break;
                 case Const.CHANNEL_DING:
@@ -64,7 +61,7 @@ public class TestSmsAction extends RunnableAction {
                         }
                     }
                     suc = HttpUtils.postWxcpMsg(token, SPUtils.getWxAgentid(sp), SPUtils.getWxTouser(sp), title, content);
-                    break;
+                    break;*/
                 default:
                     break;
             }

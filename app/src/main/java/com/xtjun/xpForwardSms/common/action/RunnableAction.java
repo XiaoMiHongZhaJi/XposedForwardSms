@@ -8,8 +8,8 @@ import com.xtjun.xpForwardSms.common.action.entity.SmsMsg;
  */
 public abstract class RunnableAction extends CallableAction implements Runnable {
 
-    public RunnableAction(SmsMsg smsMsg, SharedPreferences sp) {
-        super(smsMsg, sp);
+    public RunnableAction(SmsMsg smsMsg) {
+        super(smsMsg);
     }
 
     @Override

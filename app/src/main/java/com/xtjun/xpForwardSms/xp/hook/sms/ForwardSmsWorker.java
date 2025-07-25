@@ -23,19 +23,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ForwardSmsWorker {
-
-    private final SharedPreferences sp;
     private final Intent mSmsIntent;
     private final ScheduledExecutorService mScheduledExecutor;
 
     ForwardSmsWorker(Intent smsIntent) {
-        sp = new XSharedPreferences(MPrefConst.SP_NAME);
         mSmsIntent = smsIntent;
         mScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public String parse() {
-        boolean verboseLog = XSPUtils.isVerboseLogMode(sp);
+        boolean verboseLog = true;
         if (verboseLog) {
             XLog.setLogLevel(Log.VERBOSE);
         } else {
@@ -43,7 +40,7 @@ public class ForwardSmsWorker {
         }
 
         //获取短信
-        SmsGetAction smsGetAction = new SmsGetAction(null, sp);
+        SmsGetAction smsGetAction = new SmsGetAction(null);
         smsGetAction.setSmsIntent(mSmsIntent);
         ScheduledFuture<Bundle> smsParseFuture = mScheduledExecutor.schedule(smsGetAction, 0, TimeUnit.MILLISECONDS);
 
@@ -62,8 +59,8 @@ public class ForwardSmsWorker {
         //过滤短信内容
         boolean filterFlag = true;
 
-        if(XSPUtils.getFilterEnable(sp)){
-            String filterKeywords = XSPUtils.getFilterKeywords(sp);
+        if(false){
+            String filterKeywords = "";
             XLog.d("filterEnabled, filterKeywords: %s", filterKeywords);
             if (StringUtils.isNotEmpty(filterKeywords)){
                 Matcher matcher = Pattern.compile(filterKeywords).matcher(smsMsg.getBody());
@@ -74,7 +71,7 @@ public class ForwardSmsWorker {
         }
 
         //转发短信
-        if (filterFlag) new Thread(new ForwardSmsAction(smsMsg, sp)).start();
+        if (filterFlag) new Thread(new ForwardSmsAction(smsMsg)).start();
 
         return "success";
     }
