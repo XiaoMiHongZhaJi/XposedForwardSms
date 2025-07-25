@@ -31,10 +31,6 @@ public class SmsHandlerHook extends BaseHook {
 
     private static final String TELEPHONY_PACKAGE = "com.android.internal.telephony";
     private static final String SMS_HANDLER_CLASS = TELEPHONY_PACKAGE + ".InboundSmsHandler";
-    private static final String SELF_PACKAGE = BuildConfig.APPLICATION_ID;
-
-    private Context mPhoneContext;
-    private Context mAppContext;
 
     @Override
     public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
@@ -66,68 +62,7 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void hookSmsHandler(ClassLoader classloader) {
-        hookConstructor(classloader);
         hookDispatchIntent(classloader);
-    }
-
-    private void hookConstructor(ClassLoader classloader) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Android 14+
-            hookConstructor34(classloader);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11 ~ 13 (api 30 - 33)
-            hookConstructor30(classloader);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Android 7.0 ~ 10 (api 24 - 29)
-            hookConstructor24(classloader);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // Android 4.4 ~ 6.0 (api 19 - 23)
-            hookConstructor19(classloader);
-        }
-    }
-
-    // Android 14+
-    private void hookConstructor34(ClassLoader classLoader) {
-        XLog.i("Hooking InboundSmsHandler constructor for android v34+");
-        Class<?> smsHandlerClazz = XposedWrapper.findClass(SMS_HANDLER_CLASS, classLoader);
-        if (smsHandlerClazz != null) {
-            XposedBridge.hookAllConstructors(smsHandlerClazz, new ConstructorHook());
-        }
-    }
-
-    // Android 11+
-    private void hookConstructor30(ClassLoader classloader) {
-        XLog.i("Hooking InboundSmsHandler constructor for android v30+");
-        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
-                /* name                 */ String.class,
-                /* context              */ Context.class,
-                /* storageMonitor       */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
-                /* phone                */ TELEPHONY_PACKAGE + ".Phone",
-                new ConstructorHook());
-    }
-
-    // Android N+
-    private void hookConstructor24(ClassLoader classloader) {
-        XLog.i("Hooking InboundSmsHandler constructor for android v24+");
-        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
-                /* name                 */ String.class,
-                /* context              */ Context.class,
-                /* storageMonitor       */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
-                /* phone                */ TELEPHONY_PACKAGE + ".Phone",
-                /* cellBroadcastHandler */ TELEPHONY_PACKAGE + ".CellBroadcastHandler",
-                new ConstructorHook());
-    }
-
-    // Android KitKat+
-    private void hookConstructor19(ClassLoader classloader) {
-        XLog.i("Hooking InboundSmsHandler constructor for Android v19+");
-        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
-                /*                 name */ String.class,
-                /*              context */ Context.class,
-                /*       storageMonitor */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
-                /*                phone */ TELEPHONY_PACKAGE + ".PhoneBase",
-                /* cellBroadcastHandler */ TELEPHONY_PACKAGE + ".CellBroadcastHandler",
-                new ConstructorHook());
     }
 
     private void hookDispatchIntent(ClassLoader classloader) {
@@ -223,30 +158,6 @@ public class SmsHandlerHook extends BaseHook {
         XposedWrapper.hookMethod(exactMethod, new DispatchIntentHook(receiverIndex));
     }
 
-    private class ConstructorHook extends XC_MethodHook {
-        @Override
-        protected void afterHookedMethod(MethodHookParam param) {
-            try {
-                afterConstructorHandler(param);
-            } catch (Throwable e) {
-                XLog.e("Error occurred in constructor hook", e);
-                throw e;
-            }
-        }
-    }
-
-    private void afterConstructorHandler(XC_MethodHook.MethodHookParam param) {
-        Context context = (Context) param.args[1];
-        if (mPhoneContext == null /*|| mAppContext == null*/) {
-            mPhoneContext = context;
-            try {
-                mAppContext = mPhoneContext.createPackageContext(SELF_PACKAGE, Context.CONTEXT_IGNORE_SECURITY);
-            } catch (Exception e) {
-                XLog.e("Create app context failed: %s", e);
-            }
-        }
-    }
-
     private class DispatchIntentHook extends XC_MethodHook {
         private final int mReceiverIndex;
 
@@ -279,7 +190,7 @@ public class SmsHandlerHook extends BaseHook {
         putPhoneIdAndSubIdExtra(param.thisObject, intent);
 
         // 转发信息
-        String result = new ForwardSmsWorker(mAppContext, intent).parse();
+        String result = new ForwardSmsWorker(intent).parse();
 
         XLog.i("ForwardSmsWorker result: %s", result);
     }

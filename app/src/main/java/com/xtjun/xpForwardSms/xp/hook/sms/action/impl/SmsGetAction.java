@@ -20,8 +20,8 @@ public class SmsGetAction extends CallableAction {
 
     private Intent mSmsIntent;
 
-    public SmsGetAction(SmsMsg smsMsg, SharedPreferences xsp) {
-        super(smsMsg, xsp);
+    public SmsGetAction(SmsMsg smsMsg) {
+        super(smsMsg);
     }
 
     public void setSmsIntent(Intent smsIntent) {

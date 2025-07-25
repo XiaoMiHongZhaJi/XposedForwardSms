@@ -1,6 +1,5 @@
 package com.xtjun.xpForwardSms.xp.hook.sms;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,12 +8,12 @@ import android.util.Log;
 import com.github.xtjun.xposed.forwardSms.BuildConfig;
 import com.xtjun.xpForwardSms.common.action.entity.SmsMsg;
 import com.xtjun.xpForwardSms.common.constant.MPrefConst;
-import com.xtjun.xpForwardSms.common.msp.MultiProcessSharedPreferences;
 import com.xtjun.xpForwardSms.common.utils.StringUtils;
 import com.xtjun.xpForwardSms.common.utils.XLog;
 import com.xtjun.xpForwardSms.common.utils.XSPUtils;
 import com.xtjun.xpForwardSms.xp.hook.sms.action.impl.ForwardSmsAction;
 import com.xtjun.xpForwardSms.xp.hook.sms.action.impl.SmsGetAction;
+import de.robv.android.xposed.XSharedPreferences;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,18 +28,13 @@ public class ForwardSmsWorker {
     private final Intent mSmsIntent;
     private final ScheduledExecutorService mScheduledExecutor;
 
-    ForwardSmsWorker(Context appContext, Intent smsIntent) {
-        sp = MultiProcessSharedPreferences.getSharedPreferences(appContext, MPrefConst.SP_NAME, Context.MODE_PRIVATE);
+    ForwardSmsWorker(Intent smsIntent) {
+        sp = new XSharedPreferences(MPrefConst.SP_NAME);
         mSmsIntent = smsIntent;
         mScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public String parse() {
-        if (!XSPUtils.isEnabled(sp)) {
-            XLog.i("XposedForwardSms disabled, exiting");
-            return null;
-        }
-
         boolean verboseLog = XSPUtils.isVerboseLogMode(sp);
         if (verboseLog) {
             XLog.setLogLevel(Log.VERBOSE);
@@ -49,7 +43,7 @@ public class ForwardSmsWorker {
         }
 
         //获取短信
-        SmsGetAction smsGetAction = new SmsGetAction(null, sp);
+        SmsGetAction smsGetAction = new SmsGetAction(null);
         smsGetAction.setSmsIntent(mSmsIntent);
         ScheduledFuture<Bundle> smsParseFuture = mScheduledExecutor.schedule(smsGetAction, 0, TimeUnit.MILLISECONDS);
 
@@ -69,9 +63,8 @@ public class ForwardSmsWorker {
         boolean filterFlag = true;
 
         if(XSPUtils.getFilterEnable(sp)){
-            XLog.d("getFilterEnable: " + XSPUtils.getFilterEnable(sp));
             String filterKeywords = XSPUtils.getFilterKeywords(sp);
-            XLog.d("getFilterEnable: " + XSPUtils.getFilterEnable(sp));
+            XLog.d("filterEnabled, filterKeywords: %s", filterKeywords);
             if (StringUtils.isNotEmpty(filterKeywords)){
                 Matcher matcher = Pattern.compile(filterKeywords).matcher(smsMsg.getBody());
                 if (!matcher.find()) {

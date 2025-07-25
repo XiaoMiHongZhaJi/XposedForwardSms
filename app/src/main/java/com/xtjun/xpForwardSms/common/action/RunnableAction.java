@@ -1,7 +1,6 @@
 package com.xtjun.xpForwardSms.common.action;
 
 import android.content.SharedPreferences;
-
 import com.xtjun.xpForwardSms.common.action.entity.SmsMsg;
 
 /**
